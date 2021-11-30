@@ -1,3 +1,5 @@
 env.py
 __pychache__
+.DS_Store
+.ipynb_checkpoints/
 *.csv
