@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 
 
 
@@ -10,10 +11,11 @@ def get_connection(db_name):
     '''
     from env import host, user, password
     return f'mysql+pymysql://{user}:{password}@{host}/{db_name}'
+    
 
 
-# create function 'get_telco' to pull all records from all tables from telco_churn database..
-def get_zillow():
+# Uses get_connection function pull data from sql server
+def get_new_zillow():
     '''
     This function uses the the get_connection function to pull the following columns from zillow: bedroomcnt, bathroomcnt,
     calculatedfinishedsquarefeet, taxvaluedollarcnt, yearbuilt, taxamount, and fips.
@@ -28,4 +30,15 @@ def get_zillow():
     url = get_connection('zillow')
     df = pd.read_sql(sql, url)
     return df
+
+
+# get zillow data by reading from csv if available or pull from server if not
+def get_zillow():
+    file = 'zillow_data'
+    if os.path.isfile(file):
+        df = pd.read_csv(file, index_col=0)
+    else:
+        df = get_new_zillow()
+        df.to_csv(file)
+        return df
     
