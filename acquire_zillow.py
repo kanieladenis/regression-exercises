@@ -34,7 +34,7 @@ def get_new_zillow():
 
 # get zillow data by reading from csv if available or pull from server if not
 def get_zillow():
-    file = 'zillow_data'
+    file = 'zillow_data.csv'
     if os.path.isfile(file):
         df = pd.read_csv(file, index_col=0)
     else:
