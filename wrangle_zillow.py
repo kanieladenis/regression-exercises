@@ -6,6 +6,8 @@ import seaborn as sns
 
 from sklearn.model_selection import train_test_split
 from sklearn.impute import SimpleImputer
+import sklearn.preprocessing
+from sklearn.feature_selection import SelectKBest, f_regression
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -111,6 +113,62 @@ def prepare_zillow(df):
     
     return train, validate, test    
                                        
+
+def x_y(train, validate, test, target):
+    '''
+    this function creates the X and y version for train, validate, and test
+    '''
+    # create X & y version of train, where y is a series with just the target variable and X are all the features. 
+    X_train = train.drop(columns=[target])
+    y_train = train[target]
+
+    X_validate = validate.drop(columns=[target])
+    y_validate = validate[target]
+
+    X_test = test.drop(columns=[target])
+    y_test = test[target]
+    return X_train, X_validate, X_test, y_train, y_validate, y_test
+    
+
+    
+    
+def scaler(X_train, X_validate, X_test):
+    '''
+    This function uses Min Max Scaler to scale X version for train, validate, test
+    '''
+    # Define the thing
+    scaler = sklearn.preprocessing.MinMaxScaler()
+
+    # Fit the thing
+    scaler.fit(X_train)
+
+    # create X versions scaled
+    X_train_scaled = scaler.transform(X_train)
+    X_validate_scaled = scaler.transform(X_validate)
+    X_test_scaled = scaler.transform(X_test)
+    
+    # Convert numpy array to pandas dataframe for feature Engineering
+    X_train_scaled = pd.DataFrame(X_train_scaled, index=X_train.index, columns=X_train.columns.to_list())
+    X_validate_scaled = pd.DataFrame(X_validate_scaled, index=X_validate.index, columns=X_validate.columns.to_list())
+    X_test_scaled = pd.DataFrame(X_test_scaled, index=X_test.index, columns=X_test.columns.to_list())
+    
+    return X_train_scaled, X_validate_scaled, X_test_scaled
+
+
+def select_kbest(X_train_scaled, y_train, k):
+    # parameters: f_regression stats test, give me 2 features
+    f_selector = SelectKBest(f_regression, k=k)
+
+    # find the top 2 X's correlated with y
+    f_selector.fit(X_train_scaled, y_train)
+
+    # boolean mask of whether the column was selected or not. 
+    feature_mask = f_selector.get_support()
+
+    # get list of top K features. 
+    f_feature = X_train_scaled.iloc[:,feature_mask].columns.tolist()
+
+    return f_feature
 
 
 def wrangle_zillow():
